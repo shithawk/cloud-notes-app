@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Notes App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Smooth transitions for interactive elements */
+        .note-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .note-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+    <nav class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                    <span class="font-bold text-xl tracking-tight">CloudNotes</span>
+                </div>
+                <div>
+                    <span class="text-sm bg-blue-700 px-3 py-1 rounded-full border border-blue-500">Live Demo</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Input Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 max-w-2xl mx-auto">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Add a new note</h2>
+            <form id="noteForm" class="space-y-4">
+                <div>
+                    <input type="text" id="noteTitle" placeholder="Note Title" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                </div>
+                <div>
+                    <textarea id="noteContent" placeholder="Write your thoughts here..." rows="3" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"></textarea>
+                </div>
+                <button type="submit" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    Save to Cloud
+                </button>
+            </form>
+        </div>
+
+        <!-- Notes Display Section -->
+        <div>
+            <div class="flex justify-between items-end mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Your Notes</h2>
+                <span id="noteCount" class="text-sm text-gray-500 font-medium">0 Notes</span>
+            </div>
+            
+            <!-- This grid automatically adapts from 1 column (mobile) to 2 (tablet) to 3 (desktop) -->
+            <div id="notesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Notes will be injected here by JavaScript -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-12 text-center">
+                <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                <p class="text-gray-500 text-lg">No notes yet. Create your first one above!</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // State management (In-memory for this prototype)
+        // In a real app, this would be fetched from your AWS Database
+        let notes = [
+            { id: 1, title: "Welcome to CloudNotes", content: "This app is fully responsive. Try resizing your browser window or opening it on your phone!", date: new Date().toLocaleDateString() },
+            { id: 2, title: "AWS Architecture Idea", content: "Use AWS Amplify for frontend hosting and DynamoDB for the backend storage. Super fast setup.", date: new Date().toLocaleDateString() }
+        ];
+
+        // DOM Elements
+        const noteForm = document.getElementById('noteForm');
+        const noteTitleInput = document.getElementById('noteTitle');
+        const noteContentInput = document.getElementById('noteContent');
+        const notesContainer = document.getElementById('notesContainer');
+        const emptyState = document.getElementById('emptyState');
+        const noteCount = document.getElementById('noteCount');
+
+        // Function to render notes to the screen
+        function renderNotes() {
+            notesContainer.innerHTML = '';
+            
+            if (notes.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+                
+                notes.forEach(note => {
+                    const noteElement = document.createElement('div');
+                    noteElement.className = 'note-card bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col h-full';
+                    
+                    noteElement.innerHTML = `
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-lg text-gray-800 mb-2">${escapeHTML(note.title)}</h3>
+                            <p class="text-gray-600 whitespace-pre-wrap">${escapeHTML(note.content)}</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                            <span class="text-xs text-gray-400">${note.date}</span>
+                            <button onclick="deleteNote(${note.id})" class="text-red-500 hover:text-red-700 text-sm font-medium transition-colors">
+                                Delete
+                            </button>
+                        </div>
+                    `;
+                    notesContainer.appendChild(noteElement);
+                });
+            }
+            
+            noteCount.textContent = `${notes.length} Note${notes.length !== 1 ? 's' : ''}`;
+        }
+
+        // Handle form submission
+        noteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newNote = {
+                id: Date.now(),
+                title: noteTitleInput.value.trim(),
+                content: noteContentInput.value.trim(),
+                date: new Date().toLocaleDateString()
+            };
+
+            // Add to state
+            notes.unshift(newNote); // Add to beginning of array
+            
+            // TODO: In the real app, you would make a POST request to your AWS API Gateway here:
+            // fetch('https://your-api-id.execute-api.region.amazonaws.com/prod/notes', { ... })
+
+            // Update UI
+            renderNotes();
+            
+            // Reset form
+            noteForm.reset();
+        });
+
+        // Function to delete a note
+        window.deleteNote = function(id) {
+            notes = notes.filter(note => note.id !== id);
+            
+            // TODO: In the real app, you would make a DELETE request to your AWS API Gateway here:
+            // fetch(`https://your-api-id.execute-api.region.amazonaws.com/prod/notes/${id}`, { method: 'DELETE' })
+            
+            renderNotes();
+        };
+
+        // Utility to prevent XSS attacks when rendering text
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        // Initial render
+        renderNotes();
+    </script>
+</body>
+</html>
