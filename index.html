@@ -137,7 +137,7 @@
             notes.unshift(newNote); // Add to beginning of array
             
             // TODO: In the real app, you would make a POST request to your AWS API Gateway here:
-            // fetch('https://your-api-id.execute-api.region.amazonaws.com/prod/notes', { ... })
+            fetch('https://jq815gonjk.execute-api.us-east-1.amazonaws.com', { ... })
 
             // Update UI
             renderNotes();
@@ -151,7 +151,7 @@
             notes = notes.filter(note => note.id !== id);
             
             // TODO: In the real app, you would make a DELETE request to your AWS API Gateway here:
-            // fetch(`https://your-api-id.execute-api.region.amazonaws.com/prod/notes/${id}`, { method: 'DELETE' })
+            fetch(`https://jq815gonjk.execute-api.us-east-1.amazonaws.com/${id}`, { method: 'DELETE' })
             
             renderNotes();
         };
