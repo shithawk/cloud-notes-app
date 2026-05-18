@@ -267,18 +267,3 @@
     </script>
 </body>
 </html>
-```
-eof
-
-### What to do now:
-
-1. **Locate your API URL:** Go back to your AWS API Gateway dashboard, click on your API (e.g., `NotesAPI`), and copy the **Invoke URL** (it should look like `https://xxxxxx.execute-api.us-east-1.amazonaws.com`).
-2. **Configure your code:** Open the newly updated `index.html` file, find line **74** in the JavaScript area:
-   ```javascript
-   const API_URL = "REPLACE_WITH_YOUR_API_GATEWAY_INVOKE_URL";
-   ```
-   Replace that placeholder with your actual copied Invoke URL, and save the file.
-3. **Commit & Push to GitHub:** Commit this change and push your updated `index.html` to your GitHub repository.
-4. **Deploy live via AWS Amplify:** Because of Step 2 in our blueprint, AWS Amplify will see this change automatically, rebuild your frontend, and publish your fully live Cloud-backed application in just a few minutes!
-
-Give this a try! If your notes do not appear right away, open your browser's Developer Console (F12 or right-click -> Inspect) to check for any errors. Let me know how it goes!
