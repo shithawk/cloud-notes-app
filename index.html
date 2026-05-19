@@ -445,7 +445,7 @@
                 noteCount.textContent = "Connection Failure";
                 
                 // Show custom diagnostic banner/alert instead of native popups
-                showToast("Connection failed. Click 'Diagnostics' at the top to resolve the error.", "error");
+                showToast("Connection failed.", "error");
                 
                 // Fallback to local storage so user experience isn't fully broken
                 notes = getLocalSandboxNotes();
@@ -479,7 +479,7 @@
                             <p class="text-slate-600 resize-none leading-relaxed whitespace-pre-wrap">${escapeHTML(note.content || '')}</p>
                         </div>
                         <div class="mt-6 pt-6 border-t border-slate-50 flex justify-between items-center text-[11px]">
-                            <span class="text-slate-500 font-medium flex items-center gap-1">
+                            <span class="text-slate-500 font-large flex items-center gap-1">
                                 <i class="fa-regular fa-clock"></i>
                                 ${note.date || 'No Date'}
                             </span>
@@ -517,7 +517,7 @@
             // Handle unconfigured fallback
             if (API_URL.startsWith("REPLACE_WITH")) {
                 saveLocalSandboxNote(newNote);
-                showToast("Note saved to local Demo sandbox!", "success");
+                showToast("Note saved!", "success");
                 noteForm.reset();
                 notes = getLocalSandboxNotes();
                 notes.sort((a, b) => b.id - a.id);
@@ -535,13 +535,13 @@
 
                 if (!response.ok) throw new Error('API saving failed');
 
-                showToast("Note stored securely inside AWS DynamoDB!", "success");
+                showToast("Note stored securely!", "success");
                 noteForm.reset();
                 await fetchNotes();
 
             } catch (error) {
                 console.error("Error saving note:", error);
-                showToast("Failed to save cloud note. Click 'Diagnostics' to debug.", "error");
+                showToast("Failed to save cloud note.", "error");
             } finally {
                 setSubmitting(false);
             }
@@ -570,12 +570,12 @@
 
                 if (!response.ok) throw new Error('API delete call rejected');
 
-                showToast("Note successfully deleted from AWS cloud storage.", "success");
+                showToast("Note successfully deleted.", "success");
                 await fetchNotes();
 
             } catch (error) {
                 console.error("Error deleting note:", error);
-                showToast("Could not delete from AWS. Check CORS & Lambda permissions.", "error");
+                showToast("Could not delete from AWS.", "error");
             }
         });
 
