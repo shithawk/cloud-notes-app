@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud Notes App</title>
+
+    <!-- PWA Meta Tags & Manifest Link -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CloudNotes">
+<link rel="apple-touch-icon" href="icon-192.png">
+
     <!-- Tailwind CSS for modern look -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inter Font -->
@@ -58,6 +67,13 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
+            
+                <!-- PWA Install Button (hidden by default, shown via JS) -->
+<button id="pwaInstallBtn" class="hidden text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold items-center gap-1.5 transition-all shadow-sm">
+    <i class="fa-solid fa-circle-arrow-down animate-bounce"></i>
+    <span>Install App</span>
+</button>
+                    
                    <!-- <button onclick="toggleDiagnostics()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/20 font-medium flex items-center gap-1.5 transition-all">
                         <i class="fa-solid fa-screwdriver-wrench"></i>
                         <span>Diagnostics</span>
@@ -602,6 +618,64 @@
 
         // Initialize sequence on startup
         fetchNotes();
+
+// ==========================================
+// PWA INSTALLATION & SERVICE WORKER LOGIC
+// ==========================================
+let deferredPrompt;
+const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+
+// Listen for the browser's install prompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent default browser banner from showing automatically
+    e.preventDefault();
+    // Save the event so we can trigger it later
+    deferredPrompt = e;
+    // Reveal our custom green install button
+    if (pwaInstallBtn) {
+        pwaInstallBtn.classList.remove('hidden');
+        pwaInstallBtn.classList.add('flex');
+    }
+});
+
+if (pwaInstallBtn) {
+    pwaInstallBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        // Trigger the install dialog
+        deferredPrompt.prompt();
+        // Wait for the user's action
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to PWA install prompt: ${outcome}`);
+        // Reset the event holder (can only be used once)
+        deferredPrompt = null;
+        // Hide our button
+        pwaInstallBtn.classList.add('hidden');
+        pwaInstallBtn.classList.remove('flex');
+    });
+}
+
+// Success handler
+window.addEventListener('appinstalled', () => {
+    if (typeof showToast === 'function') {
+        showToast("CloudNotes successfully installed to your device!", "success");
+    } else {
+        alert("CloudNotes successfully installed!");
+    }
+    if (pwaInstallBtn) {
+        pwaInstallBtn.classList.add('hidden');
+        pwaInstallBtn.classList.remove('flex');
+    }
+});
+
+// Register the Service Worker background cache script (sw.js)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('ServiceWorker registered! Scope:', reg.scope))
+            .catch(err => console.log('ServiceWorker registration failed:', err));
+    });
+}
+
     </script>
 </body>
 </html>
