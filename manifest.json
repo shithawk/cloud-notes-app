@@ -1,5 +1,5 @@
 {
-  "name": "CloudNotes AWS Web App",
+  "name": "CloudNotes",
   "short_name": "CloudNotes",
   "description": "Secure Serverless Cloud Note-taking App powered by AWS",
   "start_url": "./index.html",
